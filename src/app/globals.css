@@ -1,26 +1,255 @@
 @import "tailwindcss";
 
+/* Wanderpals: a split-flap departure board on a sunny day. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --sky-top: #5DB8FF;
+  --sky-mid: #9FD6FF;
+  --sky-low: #DDF2FF;
+  --ink: #16233B;
+  --ink-2: #22365A;
+  --ink-3: #2E4670;
+  --ink-soft: #3B5277;
+  --flap: #FFF4D6;
+  --flap-dim: #C9C2AC;
+  --sun: #FFC93C;
+  --coral: #FF6B57;
+  --mint: #2FD4A3;
+  --grape: #8C6CFF;
+  --tangerine: #FF9F2E;
+  --blue: #3BB2FF;
+  --pink: #FF7EB6;
+  --paper: #FFFFFF;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-soft: var(--ink-soft);
+  --color-flap: var(--flap);
+  --color-flap-dim: var(--flap-dim);
+  --color-sun: var(--sun);
+  --color-coral: var(--coral);
+  --color-mint: var(--mint);
+  --color-grape: var(--grape);
+  --color-tangerine: var(--tangerine);
+  --color-blue: var(--blue);
+  --color-pink: var(--pink);
+  --color-sky-top: var(--sky-top);
+  --color-sky-low: var(--sky-low);
+  --font-display: var(--font-bricolage);
+  --font-sans: var(--font-figtree);
+  --font-flap: var(--font-shoulders);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-low) 100%) fixed;
+  color: var(--ink);
+  font-family: var(--font-figtree), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---------- split-flap tiles ---------- */
+.flap-row {
+  display: inline-flex;
+  gap: 0.08em;
+  font-family: var(--font-shoulders), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: middle;
+}
+.flap-xs { font-size: 12px; }
+.flap-sm { font-size: 15px; }
+.flap-md { font-size: 20px; }
+.flap-lg { font-size: 30px; }
+.flap-xl { font-size: min(52px, 7.4cqi); }
+
+.flap {
+  position: relative;
+  display: inline-block;
+  width: 0.78em;
+  height: 1.22em;
+  border-radius: 0.14em;
+  background: linear-gradient(180deg, #24385C 0 50%, #1C2D4B 50% 100%);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.06);
+  perspective: 3em;
+}
+.flap::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 0.5px);
+  height: 1px;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 3;
+}
+.flap-half {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--flap);
+}
+.flap-tone-sun .flap-half { color: var(--sun); }
+.flap-tone-mint .flap-half { color: var(--mint); }
+.flap-tone-coral .flap-half { color: #FF8E7E; }
+.flap-top { clip-path: inset(0 0 50% 0); }
+.flap-bottom { clip-path: inset(50% 0 0 0); }
+.flap-fold {
+  clip-path: inset(0 0 50% 0);
+  background: linear-gradient(180deg, #2B4168, #22365A);
+  border-radius: 0.14em;
+  transform-origin: 50% 50%;
+  animation: flap-fold 120ms ease-in forwards;
+  z-index: 2;
+}
+@keyframes flap-fold {
+  from { transform: rotateX(0deg); }
+  to { transform: rotateX(-90deg); opacity: 0.4; }
+}
+
+/* ---------- pals ---------- */
+.pal { overflow: visible; }
+.pal-bob { animation: pal-bob 2.6s ease-in-out infinite; }
+@keyframes pal-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4%); }
+}
+.pal-eyes { animation: pal-blink 4.2s infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes pal-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+.pal-wave { animation: pal-wave 0.9s ease-in-out infinite; transform-box: view-box; }
+@keyframes pal-wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-38deg); }
+}
+/* squash-and-stretch is the pals' cartoon physics; the overshoot lives in the keyframes */
+.pal-hop { animation: pal-hop 0.55s var(--ease-out); }
+@keyframes pal-hop {
+  0% { transform: translateY(0) scale(1, 1); }
+  30% { transform: translateY(-30%) scale(0.92, 1.08); }
+  70% { transform: translateY(0) scale(1.08, 0.92); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+/* ---------- board surfaces ---------- */
+.board-cq { container-type: inline-size; }
+.board {
+  background: var(--ink);
+  color: var(--flap);
+  border-radius: 22px;
+  box-shadow: 0 24px 48px -18px rgba(14, 35, 70, 0.55), 0 2px 0 rgba(255, 255, 255, 0.08) inset;
+}
+.board-rule {
+  height: 6px;
+  background: repeating-linear-gradient(90deg, var(--sun) 0 18px, var(--ink) 18px 30px);
+  border-radius: 3px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+/* ---------- map markers ---------- */
+.maplibregl-map { font: inherit; }
+.maplibregl-ctrl-attrib {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-radius: 8px 0 0 0;
+  font-size: 10px;
+}
+.stop-pin-wrap { cursor: grab; padding-bottom: 6px; }
+.stop-pin {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 4px;
+  transform: rotate(-45deg);
+  border: 3px solid var(--ink);
+  box-shadow: 0 6px 12px -4px rgba(22, 35, 59, 0.6);
+  cursor: grab;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.2s;
+}
+.stop-pin > span {
+  transform: rotate(45deg);
+  font-family: var(--font-shoulders), sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ink);
+}
+.stop-pin:hover,
+.stop-pin.is-active {
+  transform: rotate(-45deg) scale(1.22);
+}
+.stop-pin.is-dragging { cursor: grabbing; transform: rotate(-45deg) scale(1.35); }
+.city-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--flap);
+  font-family: var(--font-shoulders), sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  box-shadow: 0 8px 18px -8px rgba(22, 35, 59, 0.7);
+  transition: transform 0.35s var(--ease-out);
+}
+.city-badge b {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--sun);
+  color: var(--ink);
+  font-size: 13px;
+}
+.city-badge.is-active { transform: scale(1.15); background: var(--coral); }
+.city-badge.is-active b { background: var(--flap); }
+
+/* ---------- motion utilities ---------- */
+@keyframes dash { to { stroke-dashoffset: -36; } }
+@keyframes float {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -8px); }
+}
+@keyframes letterbox {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.rise-in { animation: rise-in 0.6s var(--ease-out) both; }
+
+.scroll-quiet { scrollbar-width: thin; scrollbar-color: var(--ink-3) transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pal-bob, .pal-eyes, .pal-wave, .pal-hop, .rise-in, .flap-fold { animation: none !important; }
 }
